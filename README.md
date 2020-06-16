@@ -35,7 +35,7 @@ kubectl switch show config
 
 ### Switch version
 ```bash
-kubectl
+kubectl switch version v1.18.0
 ```
 If the requested version does not exist it will download it and configure it.
 

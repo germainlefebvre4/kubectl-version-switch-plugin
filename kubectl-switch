@@ -1,0 +1,56 @@
+#!/bin/bash
+#set -x
+
+function Usage() {
+    echo "kubectl switch <command> <arg>"
+    echo "    <command>:"
+    echo "        show <arg>      Show core information"
+    echo "        version <arg>   Switch client version"
+    echo "        help            Show some help for the plugin."
+    echo ""
+    echo "Command: kubectl show <arg>"
+    echo "        version   Show plugin version"
+    echo "        config    Show current config"
+    echo ""
+    echo "Command: kubectl version <arg>"
+    echo "    <arg>:"
+    echo "        version   Kubernetes client version"
+}
+
+if [[ "$1" == "show" ]]
+then
+    if [[ "$2" == "version" ]]
+    then
+        echo "1.0.0"
+        exit 0
+    elif [[ "$2" == "config" ]]
+    then
+        echo "KUBECONFIG=${KUBECONFIG}"
+        exit 0
+    else
+        Usage
+    fi
+elif [[ "$1" == "version" ]]
+then
+    if [[ "$2" =~ v[0-9] ]]
+    then
+        VERSION=$2
+        if [ ! -f /usr/local/bin/alt-kubectl-${VERSION} ]
+	then
+	    if [ "$(curl -sI https://storage.googleapis.com/kubernetes-release/release/${VERSION}/bin/linux/amd64/kubectl | grep ^HTTP | grep 200 )" ]
+            then
+                echo "Downloading kubectl version ${VERSION}"
+                sudo curl -sLo /usr/local/bin/alt-kubectl-${VERSION} "https://storage.googleapis.com/kubernetes-release/release/${VERSION}/bin/linux/amd64/kubectl"
+            else
+                echo "An error occured on retrieving kubectl binary"
+		exit 1
+            fi
+        fi
+        sudo cp -f /usr/local/bin/alt-kubectl-${VERSION} /usr/local/bin/kubectl
+        echo "Switching to version ${VERSION}"
+        exit 0
+    fi
+else
+    Usage
+fi
+
